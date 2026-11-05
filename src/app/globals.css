@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+:root {
+  --font-vazirmatn: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-vazirmatn);
+  direction: rtl;
+  text-align: start;
+}

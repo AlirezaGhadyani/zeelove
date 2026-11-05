@@ -1,0 +1,10 @@
+:80 {
+  handle /media/* {
+    root * /var/media
+    file_server
+  }
+
+  handle {
+    reverse_proxy zeelove-app:3000
+  }
+}

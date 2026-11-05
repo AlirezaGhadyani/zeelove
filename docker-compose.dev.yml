@@ -1,0 +1,62 @@
+name: zeelove-dev
+
+services:
+  zeelove-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    command: pnpm run dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - APP_NAME=zeelove
+      - APP_URL=http://localhost:3000
+      - DATABASE_URL=postgresql://zeelove:zeelove_secret@postgres:5432/zeelove?schema=public
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=debug
+      - OTP_DEV_MODE=true
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: zeelove
+      POSTGRES_USER: zeelove
+      POSTGRES_PASSWORD: zeelove_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - zeelove-db-dev-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zeelove -d zeelove"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  zeelove-db-dev-data:
+    name: zeelove_db_dev_data
