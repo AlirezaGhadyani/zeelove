@@ -25,8 +25,13 @@ function loadEnvFile(filePath: string) {
   }
 }
 
-loadEnvFile(path.resolve(process.cwd(), '.env.local'));
-loadEnvFile(path.resolve(process.cwd(), '.env'));
+if (typeof process.loadEnvFile === 'function') {
+  try { process.loadEnvFile(path.resolve(process.cwd(), '.env.local')); } catch {}
+  try { process.loadEnvFile(path.resolve(process.cwd(), '.env')); } catch {}
+} else {
+  loadEnvFile(path.resolve(process.cwd(), '.env.local'));
+  loadEnvFile(path.resolve(process.cwd(), '.env'));
+}
 
 try {
   const require = createRequire(import.meta.url);

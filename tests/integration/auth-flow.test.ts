@@ -4,19 +4,41 @@ import { createAppContainer } from '@/shared/infrastructure/container/app-contai
 import { IDENTITY_TOKENS } from '@/modules/identity-access/infrastructure/container/register-identity-access';
 
 describe('Auth Flow Integration Test against PostgreSQL', () => {
+  let isDbAvailable = false;
+
   beforeAll(async () => {
-    await prisma.session.deleteMany();
-    await prisma.otpChallenge.deleteMany();
-    await prisma.user.deleteMany();
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      isDbAvailable = true;
+      await prisma.session.deleteMany();
+      await prisma.otpChallenge.deleteMany();
+      await prisma.user.deleteMany();
+    } catch {
+      isDbAvailable = false;
+      console.warn(
+        `\n⚠️  [integration] PostgreSQL is not reachable at ${process.env.DATABASE_URL || 'localhost:5432'}.\n   Skipping auth flow live DB tests.\n`,
+      );
+    }
   });
 
   afterAll(async () => {
-    await prisma.session.deleteMany();
-    await prisma.otpChallenge.deleteMany();
-    await prisma.$disconnect();
+    if (isDbAvailable) {
+      try {
+        await prisma.session.deleteMany();
+        await prisma.otpChallenge.deleteMany();
+        await prisma.$disconnect();
+      } catch {
+        // Safe cleanup
+      }
+    }
   });
 
-  it('runs request-otp, verify-otp, session creation, and logout against real DB', async () => {
+  it('runs request-otp, verify-otp, session creation, and logout against real DB', async (ctx) => {
+    if (!isDbAvailable) {
+      ctx.skip();
+      return;
+    }
+
     const container = createAppContainer();
     const requestOtp = container.resolve(IDENTITY_TOKENS.RequestOtpUseCase);
     const verifyOtp = container.resolve(IDENTITY_TOKENS.VerifyOtpUseCase);
