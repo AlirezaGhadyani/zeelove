@@ -76,7 +76,10 @@ export function FormKit({
                 className="flex items-center justify-between p-4 rounded-xl border border-border/60 bg-card"
               >
                 <div className="space-y-0.5">
-                  <Label htmlFor={field.name} className="font-medium text-foreground cursor-pointer">
+                  <Label
+                    htmlFor={field.name}
+                    className="font-medium text-foreground cursor-pointer"
+                  >
                     {field.label}
                   </Label>
                   {field.placeholder && (
@@ -151,7 +154,7 @@ export function FormKit({
                 onChange={(e) =>
                   handleChange(
                     field.name,
-                    field.type === 'number' ? Number(e.target.value) : e.target.value
+                    field.type === 'number' ? Number(e.target.value) : e.target.value,
                   )
                 }
               />

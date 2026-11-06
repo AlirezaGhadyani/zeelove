@@ -34,9 +34,7 @@ export class PrismaAuditService implements AuditServicePort {
     };
   }
 
-  public async list(
-    params: ListAuditParams
-  ): Promise<{ entries: AuditEntry[]; total: number }> {
+  public async list(params: ListAuditParams): Promise<{ entries: AuditEntry[]; total: number }> {
     const page = Math.max(1, params.page ?? 1);
     const perPage = Math.min(100, Math.max(1, params.perPage ?? 20));
     const skip = (page - 1) * perPage;

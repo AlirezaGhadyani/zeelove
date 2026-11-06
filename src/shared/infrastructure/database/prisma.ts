@@ -85,7 +85,7 @@ export function createPrismaClient(): PrismaClient {
                 try {
                   const result = (modelOrig as (...a: unknown[]) => unknown).apply(
                     modelTarget,
-                    args
+                    args,
                   );
                   if (result && typeof (result as Promise<unknown>).catch === 'function') {
                     return (result as Promise<unknown>).catch((err: unknown) => {
@@ -95,7 +95,7 @@ export function createPrismaClient(): PrismaClient {
                       }
                       console.warn(
                         `[AI Studio] Database ${String(prop)}.${String(modelProp)} fallback:`,
-                        message
+                        message,
                       );
                       const fallbackFn = mockNoOp[String(modelProp)] ?? (async () => null);
                       return fallbackFn(...args);

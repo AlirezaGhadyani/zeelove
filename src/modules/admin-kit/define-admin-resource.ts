@@ -32,7 +32,7 @@ export interface AdminResourceDefinition<T = Record<string, unknown>> {
 }
 
 export function defineAdminResource<T>(
-  config: AdminResourceDefinition<T>
+  config: AdminResourceDefinition<T>,
 ): AdminResourceDefinition<T> {
   return {
     actions: { canCreate: true, canEdit: true, canDelete: true, ...config.actions },

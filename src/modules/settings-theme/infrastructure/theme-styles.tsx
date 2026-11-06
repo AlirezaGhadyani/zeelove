@@ -29,10 +29,5 @@ export async function ThemeStyles() {
     }
   `;
 
-  return (
-    <style
-      id="zeelove-dynamic-theme"
-      dangerouslySetInnerHTML={{ __html: css }}
-    />
-  );
+  return <style id="zeelove-dynamic-theme" dangerouslySetInnerHTML={{ __html: css }} />;
 }

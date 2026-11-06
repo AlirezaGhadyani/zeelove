@@ -64,9 +64,7 @@ export function DataTable<T extends { id: string }>({
   const toggleSelectRow = (id: string) => {
     if (!onSelectIds) return;
     onSelectIds(
-      selectedIds.includes(id)
-        ? selectedIds.filter((item) => item !== id)
-        : [...selectedIds, id]
+      selectedIds.includes(id) ? selectedIds.filter((item) => item !== id) : [...selectedIds, id],
     );
   };
 
@@ -103,13 +101,19 @@ export function DataTable<T extends { id: string }>({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={columns.length + (onSelectIds ? 1 : 0) + (rowActions ? 1 : 0)} className="h-24 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={columns.length + (onSelectIds ? 1 : 0) + (rowActions ? 1 : 0)}
+                  className="h-24 text-center text-muted-foreground"
+                >
                   در حال بارگذاری اطلاعات...
                 </TableCell>
               </TableRow>
             ) : data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length + (onSelectIds ? 1 : 0) + (rowActions ? 1 : 0)} className="h-24 text-center text-muted-foreground">
+                <TableCell
+                  colSpan={columns.length + (onSelectIds ? 1 : 0) + (rowActions ? 1 : 0)}
+                  className="h-24 text-center text-muted-foreground"
+                >
                   هیچ موردی یافت نشد.
                 </TableCell>
               </TableRow>

@@ -4,7 +4,7 @@ import type { MediaRepositoryPort } from '../ports/media.repository.port';
 export class DeleteMediaUseCase {
   constructor(
     private readonly storage: StoragePort,
-    private readonly mediaRepo: MediaRepositoryPort
+    private readonly mediaRepo: MediaRepositoryPort,
   ) {}
 
   public async execute(id: string): Promise<boolean> {

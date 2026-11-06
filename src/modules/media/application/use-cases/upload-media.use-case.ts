@@ -18,7 +18,7 @@ export interface UploadMediaInput {
 export class UploadMediaUseCase {
   constructor(
     private readonly storage: StoragePort,
-    private readonly mediaRepo: MediaRepositoryPort
+    private readonly mediaRepo: MediaRepositoryPort,
   ) {}
 
   public async execute(input: UploadMediaInput): Promise<Media> {
@@ -59,7 +59,8 @@ export class UploadMediaUseCase {
     }
 
     const url = await this.storage.save(filename, finalBuffer, finalMime);
-    const folder = (input.folder || 'general').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50) || 'general';
+    const folder =
+      (input.folder || 'general').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50) || 'general';
     const now = new Date();
 
     const media = new Media({

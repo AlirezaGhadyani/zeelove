@@ -22,8 +22,8 @@ export function DataTablePagination({
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2 text-sm text-muted-foreground border-t border-border/40">
       <div>
-        نمایش {toPersianDigits(startItem)} تا {toPersianDigits(endItem)} از{' '}
-        {toPersianDigits(total)} مورد
+        نمایش {toPersianDigits(startItem)} تا {toPersianDigits(endItem)} از {toPersianDigits(total)}{' '}
+        مورد
       </div>
       <div className="flex items-center gap-2">
         <Button

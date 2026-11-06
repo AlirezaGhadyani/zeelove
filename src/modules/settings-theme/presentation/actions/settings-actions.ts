@@ -3,14 +3,8 @@
 import { prisma } from '@/shared/infrastructure/database/prisma';
 import { createAppContainer } from '@/shared/infrastructure/container/app-container';
 import { PrismaAuditService } from '@/modules/audit';
-import {
-  getSessionToken,
-  IDENTITY_TOKENS,
-} from '@/modules/identity-access';
-import {
-  type StoreSettings,
-  type ThemeConfig,
-} from '../../domain/theme-settings';
+import { getSessionToken, IDENTITY_TOKENS } from '@/modules/identity-access';
+import { type StoreSettings, type ThemeConfig } from '../../domain/theme-settings';
 import { PrismaSettingsRepository } from '../../infrastructure/adapters/prisma-settings.repository';
 
 const settingsRepo = new PrismaSettingsRepository(prisma);

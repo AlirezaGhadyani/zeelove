@@ -34,7 +34,11 @@ class FakeUserRepo implements UserRepositoryPort {
   }
 }
 
-function createUser(id: string, role: 'SUPER_ADMIN' | 'ADMIN' | 'EDITOR' | 'CUSTOMER', suffix = '1'): User {
+function createUser(
+  id: string,
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'EDITOR' | 'CUSTOMER',
+  suffix = '1',
+): User {
   return new User({
     id,
     mobile: MobileNumber.create(`0912000000${suffix}`),
@@ -60,7 +64,7 @@ describe('UpdateUserRoleUseCase Security Privilege Tests', () => {
         actor: admin,
         targetUserId: target.id,
         newRole: 'SUPER_ADMIN',
-      })
+      }),
     ).rejects.toThrow('فقط مدیر ارشد مجاز به اعطای نقش مدیر ارشد است.');
   });
 
@@ -75,7 +79,7 @@ describe('UpdateUserRoleUseCase Security Privilege Tests', () => {
         actor: superAdmin,
         targetUserId: superAdmin.id,
         newRole: 'ADMIN',
-      })
+      }),
     ).rejects.toThrow('تغییر نقش کاربری توسط خود کاربر مجاز نیست.');
   });
 
@@ -95,7 +99,7 @@ describe('UpdateUserRoleUseCase Security Privilege Tests', () => {
         actor: actorSa,
         targetUserId: soleTargetSa.id,
         newRole: 'ADMIN',
-      })
+      }),
     ).rejects.toThrow('امکان حذف یا تنزل رتبه آخرین مدیر ارشد سامانه وجود ندارد.');
   });
 

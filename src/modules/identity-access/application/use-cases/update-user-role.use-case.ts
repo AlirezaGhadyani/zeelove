@@ -1,7 +1,11 @@
 import type { UserRepositoryPort } from '../ports/user.repository.port';
 import type { User } from '../../domain/user.entity';
 import { type Role, PERMISSIONS } from '../../domain/roles-permissions';
-import { DomainRuleViolationError, ForbiddenError, NotFoundError } from '@/shared/kernel/domain-error';
+import {
+  DomainRuleViolationError,
+  ForbiddenError,
+  NotFoundError,
+} from '@/shared/kernel/domain-error';
 import { requirePermission } from '../guards/require-permission';
 
 export interface UpdateUserRoleInput {
@@ -23,7 +27,7 @@ export class UpdateUserRoleUseCase {
     if (actor.id === targetUserId) {
       throw new DomainRuleViolationError(
         'SELF_ROLE_CHANGE',
-        'تغییر نقش کاربری توسط خود کاربر مجاز نیست.'
+        'تغییر نقش کاربری توسط خود کاربر مجاز نیست.',
       );
     }
 
@@ -49,7 +53,7 @@ export class UpdateUserRoleUseCase {
       if (superAdminCount <= 1) {
         throw new DomainRuleViolationError(
           'LAST_SUPER_ADMIN',
-          'امکان حذف یا تنزل رتبه آخرین مدیر ارشد سامانه وجود ندارد.'
+          'امکان حذف یا تنزل رتبه آخرین مدیر ارشد سامانه وجود ندارد.',
         );
       }
     }

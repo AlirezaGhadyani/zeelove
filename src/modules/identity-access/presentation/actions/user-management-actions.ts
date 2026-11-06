@@ -5,7 +5,12 @@ import { prisma } from '@/shared/infrastructure/database/prisma';
 import { PrismaUserRepository } from '../../infrastructure/adapters/prisma-user.repository';
 import { UpdateUserRoleUseCase } from '../../application/use-cases/update-user-role.use-case';
 import { PrismaAuditService } from '@/modules/audit';
-import { getSessionToken, IDENTITY_TOKENS, requirePermission, PERMISSIONS } from '@/modules/identity-access';
+import {
+  getSessionToken,
+  IDENTITY_TOKENS,
+  requirePermission,
+  PERMISSIONS,
+} from '@/modules/identity-access';
 import { createAppContainer } from '@/shared/infrastructure/container/app-container';
 import type { Role } from '../../domain/roles-permissions';
 

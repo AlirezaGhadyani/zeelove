@@ -30,12 +30,7 @@ export function sniffMimeType(buffer: Buffer): SniffedMimeResult | null {
   }
 
   // GIF: 47 49 46 38 (GIF87a or GIF89a)
-  if (
-    buffer[0] === 0x47 &&
-    buffer[1] === 0x49 &&
-    buffer[2] === 0x46 &&
-    buffer[3] === 0x38
-  ) {
+  if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38) {
     return { mimeType: 'image/gif', extension: '.gif', isImage: true };
   }
 
@@ -55,12 +50,7 @@ export function sniffMimeType(buffer: Buffer): SniffedMimeResult | null {
   }
 
   // PDF: %PDF (25 50 44 46)
-  if (
-    buffer[0] === 0x25 &&
-    buffer[1] === 0x50 &&
-    buffer[2] === 0x44 &&
-    buffer[3] === 0x46
-  ) {
+  if (buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46) {
     return { mimeType: 'application/pdf', extension: '.pdf', isImage: false };
   }
 

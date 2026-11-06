@@ -40,6 +40,9 @@ describe('Auth Use Cases', () => {
     save: async (u: User) => {
       users.set(u.mobile.value, u);
     },
+    countSuperAdmins: async () =>
+      Array.from(users.values()).filter((u) => u.role === 'SUPER_ADMIN').length,
+    list: async () => Array.from(users.values()),
   };
 
   const fakeSessionRepo = {

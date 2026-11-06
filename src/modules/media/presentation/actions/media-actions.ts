@@ -7,7 +7,12 @@ import { UploadMediaUseCase } from '../../application/use-cases/upload-media.use
 import { ListMediaUseCase } from '../../application/use-cases/list-media.use-case';
 import { DeleteMediaUseCase } from '../../application/use-cases/delete-media.use-case';
 import { PrismaAuditService } from '@/modules/audit';
-import { getSessionToken, IDENTITY_TOKENS, requirePermission, PERMISSIONS } from '@/modules/identity-access';
+import {
+  getSessionToken,
+  IDENTITY_TOKENS,
+  requirePermission,
+  PERMISSIONS,
+} from '@/modules/identity-access';
 import { createAppContainer } from '@/shared/infrastructure/container/app-container';
 
 const storage = new LocalStorageAdapter();
@@ -66,11 +71,7 @@ export async function uploadMediaAction(formData: FormData) {
   }
 }
 
-export async function listMediaAction(params: {
-  folder?: string;
-  search?: string;
-  page?: number;
-}) {
+export async function listMediaAction(params: { folder?: string; search?: string; page?: number }) {
   await getAuthenticatedAdmin();
   const sanitizedFolder = params.folder?.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50);
   const result = await listUseCase.execute({ ...params, folder: sanitizedFolder });

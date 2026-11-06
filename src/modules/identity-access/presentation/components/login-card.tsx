@@ -3,7 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/shared/ui/primitives/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/shared/ui/primitives/card';
 import { Wordmark } from '@/shared/ui/brand/wordmark';
 import { toPersianDigits } from '@/shared/lib/formatters/persian-digits';
 import { requestOtpAction, verifyOtpAction } from '../actions/auth-actions';

@@ -1,5 +1,8 @@
 import type { PrismaClient } from '@prisma/client';
-import type { UserRepositoryPort, ListUsersFilter } from '../../application/ports/user.repository.port';
+import type {
+  UserRepositoryPort,
+  ListUsersFilter,
+} from '../../application/ports/user.repository.port';
 import { User } from '../../domain/user.entity';
 import { MobileNumber } from '../../domain/mobile-number.vo';
 import type { Role } from '../../domain/roles-permissions';
@@ -55,10 +58,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
     const skip = (page - 1) * limit;
     const where = filter?.search
       ? {
-          OR: [
-            { mobile: { contains: filter.search } },
-            { name: { contains: filter.search } },
-          ],
+          OR: [{ mobile: { contains: filter.search } }, { name: { contains: filter.search } }],
         }
       : {};
 

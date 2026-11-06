@@ -27,11 +27,7 @@ export function CodeStepForm({
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <OtpInput value={code} onChange={onCodeChange} disabled={loading} />
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={loading || code.length !== 6}
-      >
+      <Button type="submit" className="w-full" disabled={loading || code.length !== 6}>
         {loading ? 'در حال بررسی...' : 'تایید و ورود'}
       </Button>
       <div className="flex items-center justify-between text-sm pt-2 border-t border-border/40">

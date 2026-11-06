@@ -17,7 +17,7 @@ export interface AuditEntry {
 
 export function computeDiff(
   before?: Record<string, unknown> | null,
-  after?: Record<string, unknown> | null
+  after?: Record<string, unknown> | null,
 ): AuditDiff {
   const changes: Record<string, { old: unknown; new: unknown }> = {};
   const b = before ?? {};

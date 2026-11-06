@@ -101,9 +101,7 @@ export function UsersTable({ currentUserId }: { currentUserId: string }) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-foreground text-sm">مدیریت کاربران و دسترسی‌ها</h3>
-        <span className="text-xs text-muted-foreground">
-          تعداد کل: {toPersianDigits(total)}
-        </span>
+        <span className="text-xs text-muted-foreground">تعداد کل: {toPersianDigits(total)}</span>
       </div>
       <DataTable
         columns={columns}

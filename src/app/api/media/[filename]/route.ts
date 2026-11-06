@@ -4,7 +4,7 @@ import path from 'node:path';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ filename: string }> }
+  { params }: { params: Promise<{ filename: string }> },
 ) {
   const { filename } = await params;
   const safeFilename = path.basename(filename);

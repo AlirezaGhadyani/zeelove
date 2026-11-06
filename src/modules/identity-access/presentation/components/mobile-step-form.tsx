@@ -11,12 +11,7 @@ interface MobileStepFormProps {
   loading: boolean;
 }
 
-export function MobileStepForm({
-  mobile,
-  onMobileChange,
-  onSubmit,
-  loading,
-}: MobileStepFormProps) {
+export function MobileStepForm({ mobile, onMobileChange, onSubmit, loading }: MobileStepFormProps) {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">

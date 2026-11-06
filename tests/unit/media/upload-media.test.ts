@@ -4,7 +4,10 @@ import {
   MAX_MEDIA_SIZE_BYTES,
 } from '@/modules/media/application/use-cases/upload-media.use-case';
 import type { StoragePort } from '@/modules/media/application/ports/storage.port';
-import type { MediaRepositoryPort } from '@/modules/media/application/ports/media.repository.port';
+import type {
+  MediaRepositoryPort,
+  ListMediaResult,
+} from '@/modules/media/application/ports/media.repository.port';
 import type { Media } from '@/modules/media/domain/media.entity';
 
 class FakeStorage implements StoragePort {
@@ -14,6 +17,9 @@ class FakeStorage implements StoragePort {
   async delete(): Promise<void> {}
   async get(): Promise<Buffer | null> {
     return null;
+  }
+  getUrl(filename: string): string {
+    return `/media/${filename}`;
   }
 }
 
@@ -26,7 +32,7 @@ class FakeMediaRepo implements MediaRepositoryPort {
     this.items.push(media);
   }
   async delete(): Promise<void> {}
-  async list(): Promise<{ items: Media[]; total: number; folders: string[] }> {
+  async findMany(): Promise<ListMediaResult> {
     return { items: [], total: 0, folders: [] };
   }
 }
@@ -37,14 +43,13 @@ describe('UploadMediaUseCase Hardening Tests', () => {
   const useCase = new UploadMediaUseCase(storage, repo);
 
   it('rejects files larger than 15MB limit', async () => {
-    // 16 MB buffer
     const oversized = Buffer.alloc(MAX_MEDIA_SIZE_BYTES + 1024);
     await expect(
       useCase.execute({
         fileBuffer: oversized,
         originalName: 'large.png',
         mimeType: 'image/png',
-      })
+      }),
     ).rejects.toThrow('حجم فایل بیش از حد مجاز');
   });
 
@@ -55,12 +60,11 @@ describe('UploadMediaUseCase Hardening Tests', () => {
         fileBuffer: fakeBuffer,
         originalName: 'fake.png',
         mimeType: 'image/png',
-      })
+      }),
     ).rejects.toThrow('فرمت فایل نامعتبر');
   });
 
   it('accepts and processes valid PDF document within size limit', async () => {
-    // PDF magic bytes %PDF-
     const pdfBuffer = Buffer.from('%PDF-1.4 sample content');
     const media = await useCase.execute({
       fileBuffer: pdfBuffer,
@@ -71,7 +75,6 @@ describe('UploadMediaUseCase Hardening Tests', () => {
 
     expect(media.id).toBeDefined();
     expect(media.mimeType).toBe('application/pdf');
-    // Folder should be sanitized
     expect(media.folder).toBe('legalhack');
   });
 });
