@@ -104,3 +104,23 @@ model OtpChallenge {
   @@map("otp_challenges")
 }
 
+model Media {
+  id           String   @id @default(uuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+  altText      String?
+  folder       String   @default("general")
+  url          String
+  thumbnailUrl String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([folder])
+  @@index([createdAt])
+  @@map("media")
+}
+

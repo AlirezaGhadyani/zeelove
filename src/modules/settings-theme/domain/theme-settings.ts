@@ -31,3 +31,24 @@ export const DEFAULT_THEME_CONFIG: ThemeConfig = {
   radius: '0.75rem',
   fontScale: 'md',
 };
+
+export const SAFE_COLOR_REGEX =
+  /^(#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})|hsl\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*\)|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\))$/;
+export const SAFE_RADIUS_REGEX = /^(\d+(\.\d+)?(rem|px|em)|0)$/;
+
+export function sanitizeThemeConfig(config: Partial<ThemeConfig>): ThemeConfig {
+  const primaryColor =
+    config.primaryColor && SAFE_COLOR_REGEX.test(config.primaryColor.trim())
+      ? config.primaryColor.trim()
+      : DEFAULT_THEME_CONFIG.primaryColor;
+
+  const radius =
+    config.radius && SAFE_RADIUS_REGEX.test(config.radius.trim())
+      ? config.radius.trim()
+      : DEFAULT_THEME_CONFIG.radius;
+
+  const fontScale =
+    config.fontScale === 'sm' || config.fontScale === 'lg' ? config.fontScale : 'md';
+
+  return { primaryColor, radius, fontScale };
+}

@@ -6,9 +6,11 @@ FROM base AS deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml* package-lock.json* ./
 RUN \
-  if [ -f pnpm-lock.yaml ]; then pnpm install --frozen-lockfile; \
+  if [ -f pnpm-lock.yaml ]; then \
+    pnpm config set minimum-release-age 0 2>/dev/null || true; \
+    pnpm install --frozen-lockfile || pnpm install; \
   elif [ -f package-lock.json ]; then npm ci; \
-  else pnpm install; \
+  else npm install; \
   fi
 
 FROM base AS builder

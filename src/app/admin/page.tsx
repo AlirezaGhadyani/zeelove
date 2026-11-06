@@ -17,6 +17,7 @@ import {
   CardContent,
 } from '@/shared/ui/primitives/card';
 import { Wordmark } from '@/shared/ui/brand/wordmark';
+import { t } from '@/i18n';
 import { AdminLogoutButton } from './admin-logout-button';
 
 export const dynamic = 'force-dynamic';
@@ -50,7 +51,7 @@ export default async function AdminPage() {
           <div className="flex items-center gap-3">
             <Wordmark size="sm" />
             <span className="text-muted-foreground text-sm">|</span>
-            <span className="font-bold text-foreground">پنل مدیریت (God Mode)</span>
+            <span className="font-bold text-foreground">{t('admin.panelTitle')}</span>
           </div>
           <div className="flex items-center gap-4">
             <Badge variant="default" className="text-xs">
@@ -62,16 +63,15 @@ export default async function AdminPage() {
 
         <Card className="border-border/60 shadow-sm">
           <CardHeader>
-            <CardTitle>خوش آمدید، {user.name || 'مدیر گرامی'}</CardTitle>
+            <CardTitle>{t('admin.welcome', { name: user.name || 'مدیر گرامی' })}</CardTitle>
             <CardDescription>
-              شماره همراه: <span className="font-mono">{toPersianDigits(user.mobile.value)}</span>
+              {t('admin.mobileLabel')}{' '}
+              <span className="font-mono">{toPersianDigits(user.mobile.value)}</span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm">
-              <span className="font-bold">احراز هویت موفق:</span> شما با دسترسی{' '}
-              <span className="font-mono font-bold">{user.role}</span> وارد سامانه شده‌اید. بخش‌های
-              مدیریت کاتالوگ، سفارش‌ها و تنظیمات ویرایشی در فازهای بعدی متصل خواهند شد.
+              {t('admin.authSuccessMessage', { role: user.role })}
             </div>
           </CardContent>
         </Card>

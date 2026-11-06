@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import sharp from 'sharp';
-import type { PrismaClient } from '@prisma/client';
 import type { StoragePort } from '../ports/storage.port';
+import type { MediaRepositoryPort } from '../ports/media.repository.port';
 import { Media } from '../../domain/media.entity';
+import { sniffMimeType } from '../../domain/mime-sniffer';
 
 export interface UploadMediaInput {
   fileBuffer: Buffer;
@@ -15,20 +16,24 @@ export interface UploadMediaInput {
 export class UploadMediaUseCase {
   constructor(
     private readonly storage: StoragePort,
-    private readonly prisma: PrismaClient
+    private readonly mediaRepo: MediaRepositoryPort
   ) {}
 
   public async execute(input: UploadMediaInput): Promise<Media> {
-    const isImage = input.mimeType.startsWith('image/');
+    const sniffed = sniffMimeType(input.fileBuffer);
+    if (!sniffed) {
+      throw new Error('فرمت فایل نامعتبر یا پشتیبانی نشده است.');
+    }
+
     const fileId = randomUUID();
     let finalBuffer = input.fileBuffer;
-    let finalMime = input.mimeType;
+    let finalMime = sniffed.mimeType;
     let filename = `${fileId}-${input.originalName.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     let width: number | undefined;
     let height: number | undefined;
     let thumbnailUrl: string | undefined;
 
-    if (isImage) {
+    if (sniffed.isImage) {
       filename = `${fileId}.webp`;
       finalMime = 'image/webp';
 
@@ -41,7 +46,6 @@ export class UploadMediaUseCase {
         .webp({ quality: 85 })
         .toBuffer();
 
-      // Generate 300px thumbnail
       const thumbBuffer = await sharp(input.fileBuffer)
         .resize({ width: 300, withoutEnlargement: true })
         .webp({ quality: 80 })
@@ -53,37 +57,25 @@ export class UploadMediaUseCase {
 
     const url = await this.storage.save(filename, finalBuffer, finalMime);
     const folder = input.folder || 'general';
+    const now = new Date();
 
-    const record = await this.prisma.media.create({
-      data: {
-        id: fileId,
-        filename,
-        originalName: input.originalName,
-        mimeType: finalMime,
-        size: finalBuffer.length,
-        width,
-        height,
-        altText: input.altText,
-        folder,
-        url,
-        thumbnailUrl,
-      },
+    const media = new Media({
+      id: fileId,
+      filename,
+      originalName: input.originalName,
+      mimeType: finalMime,
+      size: finalBuffer.length,
+      width: width ?? null,
+      height: height ?? null,
+      altText: input.altText ?? null,
+      folder,
+      url,
+      thumbnailUrl: thumbnailUrl ?? null,
+      createdAt: now,
+      updatedAt: now,
     });
 
-    return new Media({
-      id: record.id,
-      filename: record.filename,
-      originalName: record.originalName,
-      mimeType: record.mimeType,
-      size: record.size,
-      width: record.width,
-      height: record.height,
-      altText: record.altText,
-      folder: record.folder,
-      url: record.url,
-      thumbnailUrl: record.thumbnailUrl,
-      createdAt: record.createdAt,
-      updatedAt: record.updatedAt,
-    });
+    await this.mediaRepo.create(media);
+    return media;
   }
 }

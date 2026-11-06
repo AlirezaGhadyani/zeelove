@@ -1,7 +1,6 @@
 'use server';
 
 import { prisma } from '@/shared/infrastructure/database/prisma';
-import { Prisma } from '@prisma/client';
 import { createAppContainer } from '@/shared/infrastructure/container/app-container';
 import { PrismaAuditService } from '@/modules/audit';
 import {
@@ -11,10 +10,10 @@ import {
 import {
   type StoreSettings,
   type ThemeConfig,
-  DEFAULT_STORE_SETTINGS,
-  DEFAULT_THEME_CONFIG,
 } from '../../domain/theme-settings';
+import { PrismaSettingsRepository } from '../../infrastructure/adapters/prisma-settings.repository';
 
+const settingsRepo = new PrismaSettingsRepository(prisma);
 const auditService = new PrismaAuditService(prisma);
 
 async function getAdminUser() {
@@ -27,28 +26,14 @@ async function getAdminUser() {
 }
 
 export async function getStoreSettingsAction(): Promise<StoreSettings> {
-  const record = await prisma.systemSetting.findUnique({
-    where: { key: 'store_settings' },
-  });
-  if (!record || !record.value) {
-    return DEFAULT_STORE_SETTINGS;
-  }
-  return { ...DEFAULT_STORE_SETTINGS, ...(record.value as unknown as Partial<StoreSettings>) };
+  return settingsRepo.getStoreSettings();
 }
 
 export async function updateStoreSettingsAction(data: Partial<StoreSettings>) {
-  const current = await getStoreSettingsAction();
+  const current = await settingsRepo.getStoreSettings();
   const updated: StoreSettings = { ...current, ...data };
 
-  await prisma.systemSetting.upsert({
-    where: { key: 'store_settings' },
-    update: { value: updated as unknown as Prisma.InputJsonValue },
-    create: {
-      key: 'store_settings',
-      value: updated as unknown as Prisma.InputJsonValue,
-      description: 'تنظیمات عمومی فروشگاه زیلاو',
-    },
-  });
+  await settingsRepo.saveStoreSettings(updated);
 
   const admin = await getAdminUser();
   if (admin) {
@@ -66,28 +51,14 @@ export async function updateStoreSettingsAction(data: Partial<StoreSettings>) {
 }
 
 export async function getThemeConfigAction(): Promise<ThemeConfig> {
-  const record = await prisma.systemSetting.findUnique({
-    where: { key: 'theme_config' },
-  });
-  if (!record || !record.value) {
-    return DEFAULT_THEME_CONFIG;
-  }
-  return { ...DEFAULT_THEME_CONFIG, ...(record.value as unknown as Partial<ThemeConfig>) };
+  return settingsRepo.getThemeConfig();
 }
 
 export async function updateThemeConfigAction(data: Partial<ThemeConfig>) {
-  const current = await getThemeConfigAction();
+  const current = await settingsRepo.getThemeConfig();
   const updated: ThemeConfig = { ...current, ...data };
 
-  await prisma.systemSetting.upsert({
-    where: { key: 'theme_config' },
-    update: { value: updated as unknown as Prisma.InputJsonValue },
-    create: {
-      key: 'theme_config',
-      value: updated as unknown as Prisma.InputJsonValue,
-      description: 'تنظیمات رنگ و استایل قالب زیلاو',
-    },
-  });
+  await settingsRepo.saveThemeConfig(updated);
 
   const admin = await getAdminUser();
   if (admin) {

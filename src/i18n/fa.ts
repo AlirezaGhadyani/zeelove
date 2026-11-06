@@ -35,6 +35,22 @@ export const faDictionary = {
     orderTotal: 'مبلغ کل سفارش',
     rating: 'امتیاز',
   },
+  admin: {
+    panelTitle: 'پنل مدیریت (God Mode)',
+    welcome: 'خوش آمدید، {name}',
+    mobileLabel: 'شماره همراه:',
+    authSuccessMessage:
+      'احراز هویت موفق: شما با دسترسی {role} وارد سامانه شده‌اید. بخش‌های مدیریت کاتالوگ، سفارش‌ها و تنظیمات ویرایشی در دسترس هستند.',
+    logout: 'خروج از حساب',
+  },
+  auth: {
+    loginTitle: 'ورود به حساب کاربری',
+    loading: 'در حال بارگذاری...',
+    mobileNumber: 'شماره همراه',
+    enterMobile: 'شماره همراه خود را وارد نمایید',
+    requestOtp: 'ارسال کد تایید',
+    verifyOtp: 'تایید و ورود',
+  },
   errors: {
     generic: 'خطای غیرمنتظره در سامانه',
     notFound: 'محتوای مورد نظر یافت نشد',
@@ -56,5 +72,7 @@ export type TranslationKey =
   | `common.${keyof Dictionary['common']}`
   | `nav.${keyof Dictionary['nav']}`
   | `commerce.${keyof Dictionary['commerce']}`
+  | `admin.${keyof Dictionary['admin']}`
+  | `auth.${keyof Dictionary['auth']}`
   | `errors.${keyof Dictionary['errors']}`
   | `designSystem.${keyof Dictionary['designSystem']}`;

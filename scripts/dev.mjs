@@ -31,9 +31,12 @@ if (!cleanArgs.includes('--port') && !cleanArgs.includes('-p')) {
   cleanArgs.push('--port', '3000');
 }
 
-const child = spawn('npx', ['next', 'dev', ...cleanArgs], {
+import path from 'node:path';
+
+const nextBin = path.resolve(process.cwd(), 'node_modules/next/dist/bin/next');
+
+const child = spawn(process.execPath, [nextBin, 'dev', ...cleanArgs], {
   stdio: 'inherit',
-  shell: true,
   env: process.env,
 });
 
