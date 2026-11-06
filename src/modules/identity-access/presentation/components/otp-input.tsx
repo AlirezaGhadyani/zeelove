@@ -11,31 +11,49 @@ interface OtpInputProps {
 
 export function OtpInput({ value, onChange, disabled }: OtpInputProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const digits = Array.from({ length: 6 }, (_, i) => value[i] ?? '');
+  const [internalDigits, setInternalDigits] = React.useState<string[]>(() =>
+    Array.from({ length: 6 }, (_, i) => value[i] ?? ''),
+  );
+
+  React.useEffect(() => {
+    setInternalDigits(Array.from({ length: 6 }, (_, i) => value[i] ?? ''));
+  }, [value]);
 
   const handleChange = (index: number, char: string) => {
     const parsed = parsePersianDigits(char).replace(/\D/g, '');
     if (!parsed) return;
 
-    const nextDigits = [...digits];
-    nextDigits[index] = parsed[parsed.length - 1] ?? '';
-    const nextVal = nextDigits.join('').slice(0, 6);
-    onChange(nextVal);
+    setInternalDigits((prev) => {
+      const next = [...prev];
+      if (parsed.length > 1) {
+        for (let i = 0; i < parsed.length && index + i < 6; i++) {
+          next[index + i] = parsed[i]!;
+        }
+      } else {
+        next[index] = parsed[parsed.length - 1] ?? '';
+      }
+      const full = next.join('').slice(0, 6);
+      onChange(full);
+      return next;
+    });
 
-    if (index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
+    const nextFocus =
+      parsed.length > 1 ? Math.min(index + parsed.length, 5) : Math.min(index + 1, 5);
+    inputRefs.current[nextFocus]?.focus();
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace') {
-      if (!digits[index] && index > 0) {
-        inputRefs.current[index - 1]?.focus();
-      } else {
-        const nextDigits = [...digits];
-        nextDigits[index] = '';
-        onChange(nextDigits.join(''));
-      }
+      setInternalDigits((prev) => {
+        if (!prev[index] && index > 0) {
+          inputRefs.current[index - 1]?.focus();
+          return prev;
+        }
+        const next = [...prev];
+        next[index] = '';
+        onChange(next.join(''));
+        return next;
+      });
     }
   };
 
@@ -45,10 +63,13 @@ export function OtpInput({ value, onChange, disabled }: OtpInputProps) {
     if (pasted.length > 0) {
       const code = pasted.slice(0, 6);
       onChange(code);
+      setInternalDigits(Array.from({ length: 6 }, (_, i) => code[i] ?? ''));
       const focusIndex = Math.min(code.length, 5);
       inputRefs.current[focusIndex]?.focus();
     }
   };
+
+  const digits = internalDigits;
 
   return (
     <div className="flex items-center justify-center gap-2" dir="ltr">

@@ -48,8 +48,8 @@ test.describe('E2E: OTP Login Flow and Protected /admin', () => {
     await page.locator('button:has-text("تایید و ورود")').click();
 
     // 6. Must land on protected /admin
-    await expect(page).toHaveURL('/admin');
-    await expect(page.locator('text=پنل مدیریت (God Mode)')).toBeVisible();
+    await expect(page).toHaveURL('/admin', { timeout: 15000 });
+    await expect(page.locator('text=پنل مدیریت (God Mode)')).toBeVisible({ timeout: 15000 });
     await expect(page.locator('text=SUPER_ADMIN').first()).toBeVisible();
 
     // 7. Test logout

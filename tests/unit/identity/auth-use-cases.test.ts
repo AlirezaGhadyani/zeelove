@@ -42,7 +42,7 @@ describe('Auth Use Cases', () => {
     },
     countSuperAdmins: async () =>
       Array.from(users.values()).filter((u) => u.role === 'SUPER_ADMIN').length,
-    list: async () => Array.from(users.values()),
+    list: async () => ({ items: Array.from(users.values()), total: users.size }),
   };
 
   const fakeSessionRepo = {

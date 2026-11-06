@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   Card,
@@ -17,7 +17,6 @@ import { MobileStepForm } from './mobile-step-form';
 import { CodeStepForm } from './code-step-form';
 
 export function LoginCard() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirect') || '/admin';
 
@@ -72,8 +71,7 @@ export function LoginCard() {
         return;
       }
       toast.success(`خوش آمدید، ${res.user.name || res.user.mobile}`);
-      router.push(redirectUrl);
-      router.refresh();
+      window.location.href = redirectUrl;
     } finally {
       setLoading(false);
     }
