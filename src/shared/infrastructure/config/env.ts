@@ -25,6 +25,9 @@ function loadEnv(): Env {
     const formatted = result.error.format();
     throw new Error(`Invalid environment configuration: ${JSON.stringify(formatted)}`);
   }
+  if (!process.env.DATABASE_URL && result.data.DATABASE_URL) {
+    process.env.DATABASE_URL = result.data.DATABASE_URL;
+  }
   return result.data;
 }
 

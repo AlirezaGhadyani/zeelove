@@ -31,7 +31,7 @@ function getRedisClient(): Redis | null {
   try {
     const client = new Redis(env.REDIS_URL, {
       maxRetriesPerRequest: 2,
-      enableOfflineQueue: false,
+      enableOfflineQueue: true,
       connectTimeout: 5000,
     });
     client.on('error', (err) => {

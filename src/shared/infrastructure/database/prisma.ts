@@ -16,7 +16,7 @@ export function createPrismaClient(): PrismaClient {
     console.warn('[AI Studio] PrismaClient instantiation fallback:', err);
   }
 
-  if (env.NODE_ENV === 'test' && realClient) {
+  if ((process.env.VITEST || env.NODE_ENV === 'test') && realClient) {
     return realClient;
   }
 
@@ -44,8 +44,16 @@ export function createPrismaClient(): PrismaClient {
         };
       }
 
-      const modelFallback = createModelFallback(String(prop));
       const orig = Reflect.get(target, prop, receiver);
+
+      if (typeof orig === 'function') {
+        return (orig as (...args: unknown[]) => unknown).bind(target);
+      }
+      if (prop === '$disconnect' || prop === '$connect') {
+        return async () => {};
+      }
+
+      const modelFallback = createModelFallback(String(prop));
 
       if (typeof orig === 'object' && orig !== null) {
         return new Proxy(orig as Record<string, unknown>, {

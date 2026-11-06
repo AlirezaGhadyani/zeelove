@@ -23,7 +23,7 @@ describe('Auth Flow Integration Test against PostgreSQL', () => {
     const getCurrentUser = container.resolve(IDENTITY_TOKENS.GetCurrentUserUseCase);
     const logout = container.resolve(IDENTITY_TOKENS.LogoutUseCase);
 
-    const testMobile = '09120000000'; // Matches SEED_SUPER_ADMIN_MOBILE
+    const testMobile = process.env.SEED_SUPER_ADMIN_MOBILE ?? '09120000000'; // Matches SEED_SUPER_ADMIN_MOBILE
 
     // 1. Request OTP
     const reqRes = await requestOtp.execute({ mobile: testMobile });
