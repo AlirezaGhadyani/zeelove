@@ -8,8 +8,8 @@ export default defineConfig({
       {
         test: {
           name: 'unit',
-          include: ['tests/unit/**/*.test.ts'],
-          environment: 'node',
+          include: ['tests/unit/**/*.test.ts', 'tests/unit/**/*.test.tsx'],
+          environment: 'jsdom',
           alias: {
             '@': path.resolve(__dirname, './src'),
           },

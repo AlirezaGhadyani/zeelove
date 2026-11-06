@@ -1,2 +1,3 @@
-// Public API of audit bounded context
-export {};
+export * from './domain/audit-entry';
+export * from './application/ports/audit.service.port';
+export * from './infrastructure/adapters/prisma-audit.service';

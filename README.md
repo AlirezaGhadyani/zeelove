@@ -39,20 +39,21 @@ pnpm run dev
 ```
 
 Visit [http://localhost:3000](http://localhost:3000) or check the health endpoints:
+
 - `GET /api/health`
 - `GET /api/ready`
 
 ## Quality Checks & Commands
 
-| Task | Command | Description |
-|---|---|---|
-| Architecture Guardrails | `pnpm run arch:check` | Verifies DDD boundary enforcement |
-| Linting | `pnpm run lint` | ESLint strict check & max lines rule (200) |
-| Type Check | `pnpm run typecheck` | Strict TypeScript compilation (`noUncheckedIndexedAccess`) |
-| Unit Tests | `pnpm run test:unit` | Vitest unit test suite |
-| Integration Tests | `pnpm run test:int` | Vitest integration test suite |
-| End-to-End Tests | `pnpm run test:e2e` | Playwright e2e test suite |
-| Docker Production | `pnpm run docker:up` | Runs production multi-stage standalone build |
+| Task                    | Command               | Description                                                |
+| ----------------------- | --------------------- | ---------------------------------------------------------- |
+| Architecture Guardrails | `pnpm run arch:check` | Verifies DDD boundary enforcement                          |
+| Linting                 | `pnpm run lint`       | ESLint strict check & max lines rule (200)                 |
+| Type Check              | `pnpm run typecheck`  | Strict TypeScript compilation (`noUncheckedIndexedAccess`) |
+| Unit Tests              | `pnpm run test:unit`  | Vitest unit test suite                                     |
+| Integration Tests       | `pnpm run test:int`   | Vitest integration test suite                              |
+| End-to-End Tests        | `pnpm run test:e2e`   | Playwright e2e test suite                                  |
+| Docker Production       | `pnpm run docker:up`  | Runs production multi-stage standalone build               |
 
 ## Production Deployment
 

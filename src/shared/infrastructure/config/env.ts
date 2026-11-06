@@ -1,9 +1,7 @@
 import { z } from 'zod';
 
 const envSchema = z.object({
-  NODE_ENV: z
-    .enum(['development', 'test', 'production'])
-    .default('development'),
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().default(3000),
   APP_NAME: z.string().default('zeelove'),
   APP_URL: z.string().url().default('http://localhost:3000'),
@@ -11,13 +9,12 @@ const envSchema = z.object({
     .string()
     .default('postgresql://zeelove:zeelove_secret@localhost:5432/zeelove?schema=public'),
   REDIS_URL: z.string().default('redis://localhost:6379'),
-  LOG_LEVEL: z
-    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
-    .default('info'),
+  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   OTP_DEV_MODE: z
     .string()
     .default('true')
     .transform((val) => val === 'true'),
+  SEED_SUPER_ADMIN_MOBILE: z.string().default('09120000000'),
 });
 
 export type Env = z.infer<typeof envSchema>;
