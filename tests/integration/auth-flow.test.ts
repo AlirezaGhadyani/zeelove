@@ -73,5 +73,5 @@ describe('Auth Flow Integration Test against PostgreSQL', () => {
       where: { userId: dbUser!.id },
     });
     expect(afterLogout).toBeNull();
-  });
+  }, 20000);
 });

@@ -4,7 +4,7 @@ WORKDIR /app
 
 FROM base AS deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml* package-lock.json* ./
+COPY package.json pnpm-lock.yaml* package-lock.json* .npmrc* ./
 RUN \
   if [ -f pnpm-lock.yaml ]; then \
     pnpm config set minimum-release-age 0 2>/dev/null || true; \

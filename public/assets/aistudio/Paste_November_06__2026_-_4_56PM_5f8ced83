@@ -1,0 +1,545 @@
+AUDIT MODE - zeelove, phases 0 to 5
+
+SCOPE: Phases 1-5 (edit this line to audit a subset)
+
+You are now a strict senior reviewer, not the author. Do NOT add features, do NOT write new code in this response. Audit everything generated so far against the Phase 0 rules and each phase's DONE WHEN criteria.
+
+RULES FOR THIS AUDIT
+- Judge only from code actually present in this conversation. You cannot run anything, so never claim tests, lint or builds pass. If something cannot be verified from the code, mark it UNVERIFIED.
+- Every finding needs evidence: file path + what is wrong. No vague statements.
+- Be critical. If a file or feature the phase required is missing, say MISSING. If it exists but is a stub, thin or fake, say STUB.
+- Local command results are provided at the bottom. Treat them as ground truth over your own assumptions.
+
+CHECK THESE AREAS
+
+1. Hard constraints (Phase 0): any external hosts/CDNs/Google Fonts/Firebase/cloud SDKs; any payment code (must be none); physical left/right Tailwind classes; hardcoded Farsi/English UI strings outside the i18n dictionary; Persian digits, Jalali dates, Toman formatting used consistently; zeelove branding consistent.
+2. Architecture (DDD): domain layers free of Next/React/Prisma imports; use cases depend on ports, not infrastructure; modules only imported through their index.ts; no cross-module deep imports; app/ routes thin with no business logic; DI composition root actually used; circular dependencies.
+3. Code structure: files over 120 lines (list all over 200), giant switch/if chains that should be registries, dead code, unused dependencies, duplicated logic, TODO placeholders.
+4. Phase 1: Dockerfile (multi-stage, non-root, standalone), compose files, health/ready routes, env validation vs .env.example mismatches, package.json scripts all existing and matching Makefile, husky/lint-staged, arch rules really enforcing boundaries.
+5. Phase 2: tokens complete (light/dark) and mapped in Tailwind; every required primitive present and RTL-correct (flipped chevrons, sheet sides, logical classes); commerce components and ProductCard variants; layout primitives; i18n typed keys; formatters + normalize with tests; showcase page; docs/design-system.md; self-hosted font instructions.
+6. Phase 3: kernel classes, Money (integer, no floats), ports with in-memory + real adapters, event bus after-commit dispatch, Prisma setup, migrations in Docker, per-module seeders, DI, integration-test harness isolation.
+7. Phase 4: OTP rules exactly as specified (6 digits, HMAC-hashed, 2-min TTL, 5 attempts, 60s cooldown, rate limit per mobile + IP, constant-time compare); DevOtpSender exposes the code ONLY when OTP_DEV_MODE=true, loud startup warning, never in production; hashed opaque sessions, cookie flags, sliding expiry, revocation; mobile number normalization; RBAC with SUPER_ADMIN bypass; requirePermission used on EVERY server action and route handler; middleware is not the only guard.
+8. Phase 5: admin shell, DataTable/FormKit/defineAdminResource really reusable; media upload validation (MIME sniffing, size limits, path traversal, filename sanitization), safe serving route; audit log captures ALL admin mutations with before/after; settings/theme values sanitized before being injected as CSS variables (CSS/XSS injection); user/role management privilege-escalation checks (can ADMIN grant SUPER_ADMIN? can someone demote or delete the last super admin or themselves?); every admin action permission-checked and zod-validated.
+9. Security pass: authorization gaps (IDOR), missing input validation, secrets committed, sensitive data in logs, rate limiting gaps.
+10. Tests: each phase's required unit/integration/e2e tests exist; list tests that are trivial, only snapshot, or don't assert real behavior; missing negative cases; e2e asserts Farsi UI.
+11. Cross-phase consistency: naming, env vars, scripts, import paths, anything Phase 4/5 assumed from earlier phases that doesn't exist.
+12. DONE WHEN criteria of every phase in scope: pass / fail / unverified with reason.
+
+OUTPUT FORMAT (exactly)
+A. Summary table: Phase | Status (PASS / PARTIAL / FAIL) | one-line reason.
+B. Findings list. Each: ID (F-01...), Severity (BLOCKER / HIGH / MEDIUM / LOW), Phase, Area, File(s), Problem, Required fix (one or two sentences, no code).
+   BLOCKER = breaks a hard constraint, security hole, or something that will break the next phases.
+C. Missing or stub deliverables (list).
+D. UNVERIFIED items I should check manually.
+E. Verdict: "Ready for Phase 6?" YES / NO, plus the top 10 fixes in priority order.
+
+LOCAL COMMAND RESULTS (ground truth):
+PS S:\Projects\zeelove> pnpm lint
+
+> zeelove@1.0.0 lint S:\Projects\zeelove
+> eslint src
+
+PS S:\Projects\zeelove> pnpm typecheck
+
+> zeelove@1.0.0 typecheck S:\Projects\zeelove
+> tsc --noEmit
+
+src/modules/media/infrastructure/adapters/prisma-media.repository.ts:13:38 - error TS2339: Property 'media' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+
+13     const record = await this.prisma.media.findUnique({ where: { id } });
+                                        ~~~~~
+
+src/modules/media/infrastructure/adapters/prisma-media.repository.ts:19:23 - error TS2339: Property 'media' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+
+19     await this.prisma.media.create({
+                         ~~~~~
+
+src/modules/media/infrastructure/adapters/prisma-media.repository.ts:39:23 - error TS2339: Property 'media' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+
+39     await this.prisma.media.delete({ where: { id } });
+                         ~~~~~
+
+src/modules/media/infrastructure/adapters/prisma-media.repository.ts:59:19 - error TS2339: Property 'media' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+
+59       this.prisma.media.count({ where }),
+                     ~~~~~
+
+src/modules/media/infrastructure/adapters/prisma-media.repository.ts:60:19 - error TS2339: Property 'media' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+
+60       this.prisma.media.findMany({
+                     ~~~~~
+
+src/modules/media/infrastructure/adapters/prisma-media.repository.ts:66:19 - error TS2339: Property 'media' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+
+66       this.prisma.media.findMany({
+                     ~~~~~
+
+
+Found 6 errors in the same file, starting at: src/modules/media/infrastructure/adapters/prisma-media.repository.ts:13
+
+ ELIFECYCLE  Command failed with exit code 2.
+PS S:\Projects\zeelove> pnpm arch:check
+
+> zeelove@1.0.0 arch:check S:\Projects\zeelove
+> depcruise src --config .dependency-cruiser.cjs
+
+
+✔ no dependency violations found (205 modules, 473 dependencies cruised)
+
+PS S:\Projects\zeelove> pnpm test:unit
+
+> zeelove@1.0.0 test:unit S:\Projects\zeelove
+> vitest run --project=unit
+
+
+ RUN  v5.1.0 S:/Projects/zeelove
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+Vitest caught 18 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/identity/auth-use-cases.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/identity/roles-permissions.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/kernel/entity-and-vo.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/kernel/result-and-error.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/container/container.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/media/mime-sniffer.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/identity/otp-challenge.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/kernel/money.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/components.test.tsx.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/formatters.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/settings/theme-sanitizer.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/ports/event-bus.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/identity/mobile-number.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/ports/cache-adapters.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/admin-kit/admin-resource.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/ports/rate-limiter.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/config.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files S:/Projects/zeelove/tests/unit/kernel/id.test.ts.
+ ❯ node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:94
+ ❯ processTicksAndRejections node:internal/process/task_queues:105:5
+ ❯ Pool.schedule node_modules/.pnpm/vitest@5.1.0_@types+node@22.20.5_jsdom@31.0.0_vite@6.4.5_@types+node@22.20.5_jiti@2.7.0_light_g3dqk3t4tpba4v524xcsezv5gm/node_modules/vitest/dist/chunks/index.Di8au7q4.js:5932:5
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'bind')
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/lib/interceptor/decompress.js:78:30
+ ❯ Module._compile node:internal/modules/cjs/loader:1562:14
+ ❯ Object..js node:internal/modules/cjs/loader:1699:10
+ ❯ Module.load node:internal/modules/cjs/loader:1313:32
+ ❯ Function._load node:internal/modules/cjs/loader:1123:12
+ ❯ TracingChannel.traceSync node:diagnostics_channel:322:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:217:24
+ ❯ Module.require node:internal/modules/cjs/loader:1335:12
+ ❯ require node:internal/modules/helpers:136:16
+ ❯ Object.<anonymous> node_modules/.pnpm/undici@8.12.4/node_modules/undici/index.js:56:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  no tests
+      Tests  no tests
+     Errors  18 errors
+   Start at  16:55:16
+   Duration  2.68s
+
+ ELIFECYCLE  Command failed with exit code 1.
+PS S:\Projects\zeelove> pnpm test:int
+
+> zeelove@1.0.0 test:int S:\Projects\zeelove
+> vitest run --project=integration
+
+
+ RUN  v5.1.0 S:/Projects/zeelove
+
+stderr | tests/integration/prisma-database.test.ts > Prisma Integration Test against PostgreSQL
+[AI Studio] Database $transaction failed, using fallback: All elements of the array need to be Prisma Client promises. Hint: Please make sure you are not awaiting the Prisma client calls you intended to pass in the $transaction function.
+
+ ✓  integration  tests/integration/health-route.test.ts (1 test) 11ms
+stderr | tests/integration/auth-flow.test.ts > Auth Flow Integration Test against PostgreSQL > runs request-otp, verify-otp, session creation, and logout against real DB
+
+====================================================================
+🚨 [SECURITY WARNING] OTP_DEV_MODE IS ACTIVE!
+🚨 OTP verification codes will be returned in API and logged.
+🚨 NEVER RUN WITH OTP_DEV_MODE=true IN A PRODUCTION ENVIRONMENT!
+====================================================================
+
+
+{"level":30,"time":"2026-11-06T13:25:27.133Z","env":"test","name":"zeelove","mobile":"09120000000","code":"126060","msg":"[DEV OTP SENDER] Code for 09120000000: 126060"}
+stdout | tests/integration/auth-flow.test.ts > Auth Flow Integration Test against PostgreSQL > runs request-otp, verify-otp, session creation, and logout against real DB
+🔑 [OTP DEV MODE] موبایل: 09120000000 | کد ورود: 126060
+
+stderr | tests/integration/prisma-database.test.ts > Prisma Integration Test against PostgreSQL > rolls back transaction changes cleanly using withRollback
+[AI Studio] Database $transaction failed, using fallback: ROLLBACK_TRANSACTION_FOR_TEST
+
+stderr | tests/integration/prisma-database.test.ts > Prisma Integration Test against PostgreSQL
+[AI Studio] Database $transaction failed, using fallback: All elements of the array need to be Prisma Client promises. Hint: Please make sure you are not awaiting the Prisma client calls you intended to pass in the $transaction function.
+
+ ❯  integration  tests/integration/prisma-database.test.ts (2 tests | 1 failed) 9421ms
+   ❯ Prisma Integration Test against PostgreSQL (2)
+     ✓ persists and retrieves an outbox event in the real database 1185ms
+     × rolls back transaction changes cleanly using withRollback 2100ms
+ ❯  integration  tests/integration/auth-flow.test.ts (1 test | 1 failed) 12386ms
+   ❯ Auth Flow Integration Test against PostgreSQL (1)
+     × runs request-otp, verify-otp, session creation, and logout against real DB 5036ms
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL   integration  tests/integration/auth-flow.test.ts > Auth Flow Integration Test against PostgreSQL > runs request-otp, verify-otp, session creation, and logout against real DB
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/integration/auth-flow.test.ts:19:3
+     17|   });
+     18|
+     19|   it('runs request-otp, verify-otp, session creation, and logout aga…
+       |   ^
+     20|     const container = createAppContainer();
+     21|     const requestOtp = container.resolve(IDENTITY_TOKENS.RequestOtpU…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL   integration  tests/integration/prisma-database.test.ts > Prisma Integration Test against PostgreSQL > rolls back transaction changes cleanly using withRollback
+AssertionError: expected { …(10) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "aggregateId": "temp-1",
+  "createdAt": 2026-11-06T13:25:29.263Z,
+  "eventId": "rollback-event-99",
+  "eventName": "temp.event",
+  "id": "3c48c577-4f72-4cb8-9360-9ad33bc79dc4",
+  "occurredOn": 2026-11-06T13:25:29.262Z,
+  "payload": {
+    "temporary": true,
+  },
+  "processedAt": null,
+  "retries": 0,
+  "status": "PENDING",
+}
+
+ ❯ tests/integration/prisma-database.test.ts:61:21
+     59|       where: { eventId: 'rollback-event-99' },
+     60|     });
+     61|     expect(outside).toBeNull();
+       |                     ^
+     62|   });
+     63| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  2 failed | 2 passed (4)
+   Start at  16:55:20
+   Duration  13.55s (tests 93%, import 4%, transform 2%)
+
+ ELIFECYCLE  Command failed with exit code 1.

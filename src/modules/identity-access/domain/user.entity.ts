@@ -67,4 +67,9 @@ export class User extends AggregateRoot<string> {
     this._name = name;
     this._updatedAt = new Date();
   }
+
+  public updateRole(newRole: Role): void {
+    this._role = newRole;
+    this._updatedAt = new Date();
+  }
 }

@@ -7,7 +7,7 @@ import { UploadMediaUseCase } from '../../application/use-cases/upload-media.use
 import { ListMediaUseCase } from '../../application/use-cases/list-media.use-case';
 import { DeleteMediaUseCase } from '../../application/use-cases/delete-media.use-case';
 import { PrismaAuditService } from '@/modules/audit';
-import { getSessionToken, IDENTITY_TOKENS } from '@/modules/identity-access';
+import { getSessionToken, IDENTITY_TOKENS, requirePermission, PERMISSIONS } from '@/modules/identity-access';
 import { createAppContainer } from '@/shared/infrastructure/container/app-container';
 
 const storage = new LocalStorageAdapter();
@@ -17,10 +17,23 @@ const listUseCase = new ListMediaUseCase(mediaRepo);
 const deleteUseCase = new DeleteMediaUseCase(storage, mediaRepo);
 const auditService = new PrismaAuditService(prisma);
 
+async function getAuthenticatedAdmin() {
+  const token = await getSessionToken();
+  const container = createAppContainer();
+  const getCurrentUser = container.resolve(IDENTITY_TOKENS.GetCurrentUserUseCase);
+  const userRes = await getCurrentUser.execute({ sessionToken: token || '' });
+  if (userRes.isErr || !userRes.value) {
+    throw new Error('برای این عملیات احراز هویت الزامی است.');
+  }
+  return requirePermission(userRes.value, PERMISSIONS.ADMIN_ACCESS);
+}
+
 export async function uploadMediaAction(formData: FormData) {
+  const admin = await getAuthenticatedAdmin();
   const file = formData.get('file') as File | null;
-  const folder = (formData.get('folder') as string) || 'general';
-  const altText = (formData.get('altText') as string) || '';
+  const rawFolder = (formData.get('folder') as string) || 'general';
+  const folder = rawFolder.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50) || 'general';
+  const altText = ((formData.get('altText') as string) || '').slice(0, 200);
 
   if (!file) {
     return { ok: false, error: 'هیچ فایلی انتخاب نشده است.' };
@@ -38,21 +51,13 @@ export async function uploadMediaAction(formData: FormData) {
       altText,
     });
 
-    const token = await getSessionToken();
-    if (token) {
-      const container = createAppContainer();
-      const getCurrentUser = container.resolve(IDENTITY_TOKENS.GetCurrentUserUseCase);
-      const userRes = await getCurrentUser.execute({ sessionToken: token });
-      if (userRes.isOk && userRes.value) {
-        await auditService.record({
-          adminId: userRes.value.id,
-          action: 'MEDIA_UPLOAD',
-          entity: 'Media',
-          entityId: media.id,
-          after: { filename: media.filename, originalName: media.originalName, size: media.size },
-        });
-      }
-    }
+    await auditService.record({
+      adminId: admin.id,
+      action: 'MEDIA_UPLOAD',
+      entity: 'Media',
+      entityId: media.id,
+      after: { filename: media.filename, originalName: media.originalName, size: media.size },
+    });
 
     return { ok: true, media: { id: media.id, url: media.url, altText: media.altText } };
   } catch (err: unknown) {
@@ -66,7 +71,9 @@ export async function listMediaAction(params: {
   search?: string;
   page?: number;
 }) {
-  const result = await listUseCase.execute(params);
+  await getAuthenticatedAdmin();
+  const sanitizedFolder = params.folder?.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50);
+  const result = await listUseCase.execute({ ...params, folder: sanitizedFolder });
   return {
     items: result.items.map((m) => ({
       id: m.id,
@@ -88,6 +95,17 @@ export async function listMediaAction(params: {
 }
 
 export async function deleteMediaAction(id: string) {
+  const admin = await getAuthenticatedAdmin();
+  const existing = await mediaRepo.findById(id);
   const success = await deleteUseCase.execute(id);
+  if (success && existing) {
+    await auditService.record({
+      adminId: admin.id,
+      action: 'MEDIA_DELETE',
+      entity: 'Media',
+      entityId: id,
+      before: { filename: existing.filename, url: existing.url },
+    });
+  }
   return { ok: success };
 }

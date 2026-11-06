@@ -46,31 +46,16 @@ const mockNoOp: Record<string, FallbackHandler> = {
 };
 
 export function createPrismaClient(): PrismaClient {
-  let realClient: PrismaClient;
-  try {
-    realClient = new PrismaClient({
-      log: env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
-    });
-  } catch {
-    console.warn('[AI Studio] Database not connected — using mock');
-    return new Proxy({} as PrismaClient, {
-      get: (_, prop) =>
-        prop === '$transaction'
-          ? async (fn: unknown) => (typeof fn === 'function' ? fn({}) : [])
-          : mockNoOp,
-    });
+  const realClient = new PrismaClient({
+    log: env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
+  });
+
+  // In test mode, always use native client to preserve PrismaPromise and transaction rollbacks
+  if (env.NODE_ENV === 'test') {
+    return realClient;
   }
 
-  const mockTransaction = async (arg: unknown): Promise<unknown> => {
-    if (typeof arg === 'function') {
-      return (arg as (client: unknown) => Promise<unknown>)(realClient);
-    }
-    if (Array.isArray(arg)) {
-      return Promise.all(arg);
-    }
-    return [];
-  };
-
+  // In development, provide a graceful fallback proxy if database is unreachable
   return new Proxy(realClient, {
     get(target, prop, receiver) {
       if (prop === '$transaction') {
@@ -79,8 +64,14 @@ export function createPrismaClient(): PrismaClient {
             return await (target.$transaction as (a: unknown) => Promise<unknown>)(arg);
           } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);
-            console.warn('[AI Studio] Database $transaction failed, using fallback:', message);
-            return mockTransaction(arg);
+            if (message.includes('ROLLBACK_TRANSACTION_FOR_TEST')) {
+              throw err;
+            }
+            console.warn('[AI Studio] Database $transaction fallback:', message);
+            if (typeof arg === 'function') {
+              return (arg as (client: unknown) => Promise<unknown>)(target);
+            }
+            return [];
           }
         };
       }
@@ -90,18 +81,28 @@ export function createPrismaClient(): PrismaClient {
           get(modelTarget, modelProp, modelReceiver) {
             const modelOrig = Reflect.get(modelTarget, modelProp, modelReceiver);
             if (typeof modelOrig === 'function') {
-              return async function (...args: unknown[]) {
+              return function (...args: unknown[]) {
                 try {
-                  return await (modelOrig as (...a: unknown[]) => Promise<unknown>).apply(
+                  const result = (modelOrig as (...a: unknown[]) => unknown).apply(
                     modelTarget,
                     args
                   );
-                } catch (err: unknown) {
-                  const message = err instanceof Error ? err.message : String(err);
-                  console.warn(
-                    `[AI Studio] Database ${String(prop)}.${String(modelProp)} failed, using fallback:`,
-                    message
-                  );
+                  if (result && typeof (result as Promise<unknown>).catch === 'function') {
+                    return (result as Promise<unknown>).catch((err: unknown) => {
+                      const message = err instanceof Error ? err.message : String(err);
+                      if (message.includes('ROLLBACK_TRANSACTION_FOR_TEST')) {
+                        throw err;
+                      }
+                      console.warn(
+                        `[AI Studio] Database ${String(prop)}.${String(modelProp)} fallback:`,
+                        message
+                      );
+                      const fallbackFn = mockNoOp[String(modelProp)] ?? (async () => null);
+                      return fallbackFn(...args);
+                    });
+                  }
+                  return result;
+                } catch {
                   const fallbackFn = mockNoOp[String(modelProp)] ?? (async () => null);
                   return fallbackFn(...args);
                 }

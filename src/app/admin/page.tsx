@@ -19,6 +19,7 @@ import {
 import { Wordmark } from '@/shared/ui/brand/wordmark';
 import { t } from '@/i18n';
 import { AdminLogoutButton } from './admin-logout-button';
+import { UsersTable } from './users-table';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,6 +74,12 @@ export default async function AdminPage() {
             <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm">
               {t('admin.authSuccessMessage', { role: user.role })}
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60 shadow-sm">
+          <CardContent className="p-6">
+            <UsersTable currentUserId={user.id} />
           </CardContent>
         </Card>
       </div>
