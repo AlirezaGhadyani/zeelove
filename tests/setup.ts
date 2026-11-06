@@ -1,25 +1,24 @@
-import zlib from 'node:zlib';
-import { Transform } from 'node:stream';
+import { createRequire } from 'node:module';
 
-const z = zlib as unknown as {
-  createZstdDecompress?: () => Transform;
-  constants?: Record<string, number>;
-};
-
-if (!z.createZstdDecompress) {
-  z.createZstdDecompress = function () {
-    return new Transform({
-      transform(chunk, _encoding, callback) {
-        callback(null, chunk);
-      },
-    });
-  };
-}
-
-if (!z.constants) {
-  z.constants = {};
-}
-
-if (!z.constants.ZSTD_d_windowLogMax) {
-  z.constants.ZSTD_d_windowLogMax = 23;
+try {
+  const require = createRequire(import.meta.url);
+  const zlib = require('node:zlib');
+  if (typeof zlib.createZstdDecompress !== 'function') {
+    const { Transform } = require('node:stream');
+    zlib.createZstdDecompress = function () {
+      return new Transform({
+        transform(
+          chunk: unknown,
+          _encoding: unknown,
+          callback: (err?: Error | null, data?: unknown) => void,
+        ) {
+          callback(null, chunk);
+        },
+      });
+    };
+  }
+  if (!zlib.constants) zlib.constants = {};
+  if (!zlib.constants.ZSTD_d_windowLogMax) zlib.constants.ZSTD_d_windowLogMax = 23;
+} catch {
+  // Safe fallback
 }
