@@ -7,7 +7,11 @@ export const metadata: Metadata = {
     template: '%s | زیلاو',
     default: 'زیلاو',
   },
-  description: 'زیلاو - پلتفرم تجارت الکترونیک بومی و سیستم مدیریت محتوای اختصاصی',
+  description: 'زیلاو - پلتفرم فروشگاهی و مدیریت محتوای اختصاصی با پشتیبانی کامل از زبان فارسی و راست‌چین',
+  openGraph: {
+    title: 'زیلاو',
+    description: 'زیلاو - پلتفرم فروشگاهی و مدیریت محتوای اختصاصی با پشتیبانی کامل از زبان فارسی و راست‌چین',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

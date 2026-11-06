@@ -1,43 +1,43 @@
 .PHONY: install dev build start lint lint-fix format typecheck test-unit test-int test test-e2e arch-check docker-up docker-down docker-dev
 
 install:
-	pnpm install
+	npm install
 
 dev:
-	pnpm run dev
+	npm run dev
 
 build:
-	pnpm run build
+	npm run build
 
 start:
-	pnpm run start
+	npm run start
 
 lint:
-	pnpm run lint
+	npm run lint
 
 lint-fix:
-	pnpm run lint:fix
+	npm run lint:fix
 
 format:
-	pnpm run format
+	npm run format
 
 typecheck:
-	pnpm run typecheck
+	npm run typecheck
 
 test-unit:
-	pnpm run test:unit
+	npm run test:unit
 
 test-int:
-	pnpm run test:int
+	npm run test:int
 
 test:
-	pnpm run test
+	npm run test
 
 test-e2e:
-	pnpm run test:e2e
+	npm run test:e2e
 
 arch-check:
-	pnpm run arch:check
+	npm run arch:check
 
 docker-up:
 	docker compose up -d
