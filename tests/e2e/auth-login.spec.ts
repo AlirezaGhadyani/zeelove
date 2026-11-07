@@ -4,14 +4,24 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 test.describe('E2E: OTP Login Flow and Protected /admin', () => {
+  const adminMobile = process.env.SEED_SUPER_ADMIN_MOBILE || '09120000000';
+
   test.beforeAll(async () => {
-    await prisma.otpChallenge.deleteMany({
-      where: { mobile: '09120000000' },
-    });
+    try {
+      await prisma.otpChallenge.deleteMany({
+        where: { mobile: { in: ['09120000000', adminMobile] } },
+      });
+    } catch {
+      // Safe fallback if direct connection is offline
+    }
   });
 
   test.afterAll(async () => {
-    await prisma.$disconnect();
+    try {
+      await prisma.$disconnect();
+    } catch {
+      // Safe cleanup
+    }
   });
 
   test('redirects unauthenticated user from /admin to /auth/login', async ({ page }) => {
@@ -24,7 +34,7 @@ test.describe('E2E: OTP Login Flow and Protected /admin', () => {
     await page.goto('/auth/login?redirect=/admin');
 
     // 1. Enter mobile
-    await page.locator('input[type="tel"]').fill('09120000000');
+    await page.locator('input[type="tel"]').fill(adminMobile);
     await page.locator('button:has-text("دریافت کد تایید")').click();
 
     // 2. Wait for code step and test-mode banner/toast

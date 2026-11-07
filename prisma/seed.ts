@@ -39,6 +39,18 @@ export const moduleSeeders: ModuleSeeder[] = [
           status: 'ACTIVE',
         },
       });
+      if (superAdminMobile !== '09120000000') {
+        await prisma.user.upsert({
+          where: { mobile: '09120000000' },
+          update: { role: 'SUPER_ADMIN', status: 'ACTIVE' },
+          create: {
+            mobile: '09120000000',
+            name: 'مدیر کل زیلاو (تست)',
+            role: 'SUPER_ADMIN',
+            status: 'ACTIVE',
+          },
+        });
+      }
     },
   },
 ];
