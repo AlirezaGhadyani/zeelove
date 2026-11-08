@@ -19,6 +19,7 @@ import {
 import { Wordmark } from '@/shared/ui/brand/wordmark';
 import { t } from '@/i18n';
 import { AdminLogoutButton } from './admin-logout-button';
+import { AdminNav } from './admin-nav';
 import { UsersTable } from './users-table';
 
 export const dynamic = 'force-dynamic';
@@ -61,6 +62,8 @@ export default async function AdminPage() {
             <AdminLogoutButton />
           </div>
         </header>
+
+        <AdminNav />
 
         <Card className="border-border/60 shadow-sm">
           <CardHeader>

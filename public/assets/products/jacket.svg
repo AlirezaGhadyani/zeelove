@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="jacketGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" rx="24" fill="url(#jacketGrad)"/>
+  <circle cx="200" cy="200" r="120" fill="#a855f7" fill-opacity="0.12"/>
+  <path d="M130 110 L180 140 L220 140 L270 110 L300 190 L265 200 L265 290 L135 290 L135 200 L100 190 Z" fill="#8b5cf6" stroke="#a78bfa" stroke-width="4" stroke-linejoin="round"/>
+  <line x1="200" y1="140" x2="200" y2="290" stroke="#c4b5fd" stroke-width="3" stroke-dasharray="4"/>
+  <text x="200" y="340" fill="#94a3b8" font-size="16" font-family="sans-serif" text-anchor="middle" font-weight="bold">زیلاو | کت و کاپشن</text>
+</svg>

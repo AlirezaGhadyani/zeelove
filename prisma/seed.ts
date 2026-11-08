@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { seedCatalogAndInventory } from './seed-catalog';
 
 export interface ModuleSeeder {
   readonly name: string;
@@ -51,6 +52,12 @@ export const moduleSeeders: ModuleSeeder[] = [
           },
         });
       }
+    },
+  },
+  {
+    name: 'catalog-and-inventory',
+    seed: async (prisma) => {
+      await seedCatalogAndInventory(prisma);
     },
   },
 ];
