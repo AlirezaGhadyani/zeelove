@@ -1,5 +1,6 @@
 'use server';
 
+import { redirect } from 'next/navigation';
 import { createAppContainer } from '@/shared/infrastructure/container/app-container';
 import { IDENTITY_TOKENS } from '../../infrastructure/container/register-identity-access';
 import {
@@ -62,7 +63,7 @@ export async function logoutAction() {
       console.warn('[AI Studio] Clear cookie warning:', err);
     }
   }
-  return { ok: true };
+  redirect('/auth/login');
 }
 
 export async function getCurrentUserAction() {
