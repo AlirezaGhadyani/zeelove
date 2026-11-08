@@ -36,6 +36,9 @@ test:
 test-e2e:
 	npm run test:e2e
 
+test-e2e-install:
+	npm run test:e2e:install
+
 arch-check:
 	npm run arch:check
 

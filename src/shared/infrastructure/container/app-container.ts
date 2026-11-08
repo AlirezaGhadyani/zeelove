@@ -30,9 +30,13 @@ function getRedisClient(): Redis | null {
   }
   try {
     const client = new Redis(env.REDIS_URL, {
-      maxRetriesPerRequest: 2,
-      enableOfflineQueue: true,
-      connectTimeout: 5000,
+      maxRetriesPerRequest: 1,
+      enableOfflineQueue: false,
+      connectTimeout: 2000,
+      retryStrategy(times) {
+        if (times > 3) return null;
+        return Math.min(times * 100, 1000);
+      },
     });
     client.on('error', (err) => {
       console.warn('[Redis] Connection warning:', err.message);

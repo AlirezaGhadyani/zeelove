@@ -18,6 +18,7 @@
     "test:int": "node -r ./scripts/polyfill-zstd.cjs ./node_modules/vitest/vitest.mjs run --project=integration",
     "test": "node -r ./scripts/polyfill-zstd.cjs ./node_modules/vitest/vitest.mjs run",
     "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium",
     "check:rtl": "node scripts/check-rtl-utilities.mjs",
     "arch:check": "depcruise src --config .dependency-cruiser.cjs",
     "db:migrate": "prisma migrate deploy",
