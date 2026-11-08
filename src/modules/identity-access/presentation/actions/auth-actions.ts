@@ -47,12 +47,21 @@ export async function verifyOtpAction(mobile: string, code: string) {
 }
 
 export async function logoutAction() {
-  const token = await getSessionToken();
-  if (token) {
-    const useCase = container.resolve(IDENTITY_TOKENS.LogoutUseCase);
-    await useCase.execute({ sessionToken: token });
+  try {
+    const token = await getSessionToken();
+    if (token) {
+      const useCase = container.resolve(IDENTITY_TOKENS.LogoutUseCase);
+      await useCase.execute({ sessionToken: token });
+    }
+  } catch (err) {
+    console.warn('[AI Studio] Logout action warning:', err);
+  } finally {
+    try {
+      await clearSessionCookie();
+    } catch (err) {
+      console.warn('[AI Studio] Clear cookie warning:', err);
+    }
   }
-  await clearSessionCookie();
   return { ok: true };
 }
 

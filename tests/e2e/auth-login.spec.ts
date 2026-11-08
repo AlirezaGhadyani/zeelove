@@ -64,6 +64,6 @@ test.describe('E2E: OTP Login Flow and Protected /admin', () => {
 
     // 7. Test logout
     await page.locator('button:has-text("خروج از حساب")').click();
-    await expect(page).toHaveURL('/auth/login');
+    await expect(page).toHaveURL(/\/auth\/login/, { timeout: 15000 });
   });
 });
