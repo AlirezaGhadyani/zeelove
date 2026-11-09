@@ -20,6 +20,7 @@ const navItems = [
   { href: '/admin/brands', label: 'برندها', icon: Tag },
   { href: '/admin/attributes', label: 'ویژگی‌ها', icon: Sliders },
   { href: '/admin/inventory', label: 'موجودی انبار', icon: Warehouse },
+  { href: '/admin/navigation', label: 'منوهای ناوبری', icon: FolderTree },
 ];
 
 export function AdminNav() {

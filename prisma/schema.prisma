@@ -285,3 +285,78 @@ model InventoryReservation {
   @@map("inventory_reservations")
 }
 
+model NavigationMenu {
+  id        String               @id @default(uuid())
+  code      String               @unique
+  title     String
+  items     NavigationMenuItem[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@map("navigation_menus")
+}
+
+model NavigationMenuItem {
+  id           String               @id @default(uuid())
+  menuId       String
+  parentId     String?
+  title        String
+  url          String
+  target       String?              @default("_self")
+  displayOrder Int                  @default(0)
+  isActive     Boolean              @default(true)
+  menu         NavigationMenu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  parent       NavigationMenuItem?  @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children     NavigationMenuItem[] @relation("MenuHierarchy")
+
+  @@index([menuId])
+  @@index([parentId])
+  @@index([displayOrder])
+  @@map("navigation_menu_items")
+}
+
+model CmsPage {
+  id                 String           @id @default(uuid())
+  slug               String           @unique
+  title              String
+  type               String           @default("CUSTOM")
+  seo                Json?
+  publishedVersionId String?
+  versions           CmsPageVersion[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([type])
+  @@map("cms_pages")
+}
+
+model CmsPageVersion {
+  id                   String    @id @default(uuid())
+  pageId               String
+  versionNumber        Int
+  status               String    @default("DRAFT")
+  rows                 Json      @default("[]")
+  scheduledPublishAt   DateTime?
+  scheduledUnpublishAt DateTime?
+  publishedAt          DateTime?
+  createdBy            String?
+  createdAt            DateTime  @default(now())
+  page                 CmsPage   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, versionNumber])
+  @@index([pageId, status])
+  @@map("cms_page_versions")
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String?
+  mobile    String?
+  source    String?  @default("storefront_block")
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([mobile])
+  @@map("newsletter_subscribers")
+}
+

@@ -80,6 +80,10 @@ export class Product extends AggregateRoot<string> {
     return this._variants.find((v) => v.isDefault) ?? this._variants[0];
   }
 
+  public get mainImage(): ProductImage | undefined {
+    return this._images.find((img) => img.isMain) ?? this._images[0];
+  }
+
   public addVariant(variant: ProductVariant): void {
     if (this._variants.some((v) => v.sku === variant.sku)) {
       throw new DomainRuleViolationError('DUPLICATE_SKU', `SKU ${variant.sku} already exists`);

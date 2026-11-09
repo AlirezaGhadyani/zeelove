@@ -1,25 +1,57 @@
-import { env } from '@/shared/infrastructure/config/env';
+import React from 'react';
+import type { Metadata } from 'next';
+import { appContainer } from '@/shared/infrastructure/container/app-container';
+import { CONTENT_TOKENS } from '@/modules/content/infrastructure/container/register-content';
+import { StorefrontShell } from '@/components/storefront/storefront-shell';
+import { PageRenderer } from '@/modules/content/rendering/page-renderer';
+import { ZEELOVE_HOMEPAGE_ROWS } from '@/modules/content/infrastructure/seed/homepage-seed';
 
-export default function HomePage() {
+export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const getPage = appContainer.resolve(CONTENT_TOKENS.GetPageUseCase);
+  const res = await getPage.execute({ type: 'home' });
+
+  const title = res.isOk && res.value.page.seo?.metaTitle
+    ? res.value.page.seo.metaTitle
+    : 'زیلاو | فروشگاه آنلاین مد و استایل اصیل';
+
+  const description = res.isOk && res.value.page.seo?.metaDescription
+    ? res.value.page.seo.metaDescription
+    : 'خرید انواع پوشاک و اکسسوری از برترین برندهای اصیل ایرانی';
+
+  return {
+    title,
+    description,
+  };
+}
+
+export default async function HomePage() {
+  const getPage = appContainer.resolve(CONTENT_TOKENS.GetPageUseCase);
+  const res = await getPage.execute({ type: 'home' });
+
+  const rows = res.isOk && res.value.rows.length > 0
+    ? res.value.rows
+    : ZEELOVE_HOMEPAGE_ROWS;
+
+  const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'زیلاو',
+    url: process.env.APP_URL || 'https://zeelove.ir',
+    logo: `${process.env.APP_URL || 'https://zeelove.ir'}/assets/logo.svg`,
+    description: 'فروشگاه تخصصی مد و استایل زیلاو؛ پوشاک، کفش و اکسسوری اورجینال',
+  };
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-      <div className="max-w-md w-full p-8 rounded-2xl border border-neutral-800 bg-neutral-900/60 shadow-2xl space-y-4">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-2xl font-bold">
-          💎
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">{env.APP_NAME} (زیلاو)</h1>
-        <p className="text-sm text-neutral-400">
-          هسته زیرساخت و معماری دامنه-محور (فاز ۱ - پایه و ابزارها) با موفقیت مستقر شد.
-        </p>
-        <div className="pt-2">
-          <a
-            href="/api/health"
-            className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-xs font-mono text-neutral-200 transition-colors"
-          >
-            بررسی وضعیت سرور (/api/health)
-          </a>
-        </div>
-      </div>
-    </main>
+    <StorefrontShell>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <main className="w-full">
+        <PageRenderer rows={rows} />
+      </main>
+    </StorefrontShell>
   );
 }

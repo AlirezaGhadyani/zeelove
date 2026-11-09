@@ -80,6 +80,7 @@ export async function GET(request: NextRequest) {
         isMain: img.isMain,
         displayOrder: img.displayOrder,
       })),
+      imageUrl: p.mainImage?.url ?? p.images[0]?.url,
       defaultVariant: defaultVariant
         ? {
             id: defaultVariant.id,

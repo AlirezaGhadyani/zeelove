@@ -41,6 +41,8 @@ export async function createProductAction(input: CreateProductInput) {
   }
 
   revalidatePath('/admin/products');
+  revalidatePath('/', 'layout');
+  revalidatePath('/products');
   return { ok: true, productId: product.id, slug: product.slug.value };
 }
 
@@ -53,6 +55,8 @@ export async function updateProductAction(input: UpdateProductInput) {
   }
 
   revalidatePath('/admin/products');
+  revalidatePath('/', 'layout');
+  revalidatePath('/products');
   return { ok: true, productId: result.value.id, slug: result.value.slug.value };
 }
 
@@ -60,6 +64,8 @@ export async function deleteProductAction(id: string) {
   const repo = container.resolve(CATALOG_TOKENS.ProductRepository);
   await repo.delete(id);
   revalidatePath('/admin/products');
+  revalidatePath('/', 'layout');
+  revalidatePath('/products');
   return { ok: true };
 }
 
@@ -83,6 +89,8 @@ export async function manageCategoryAction(
   }
 
   revalidatePath('/admin/categories');
+  revalidatePath('/', 'layout');
+  revalidatePath('/products');
   return { ok: true };
 }
 
@@ -104,6 +112,8 @@ export async function manageBrandAction(
   }
 
   revalidatePath('/admin/brands');
+  revalidatePath('/', 'layout');
+  revalidatePath('/products');
   return { ok: true };
 }
 

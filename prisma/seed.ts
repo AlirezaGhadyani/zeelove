@@ -60,6 +60,13 @@ export const moduleSeeders: ModuleSeeder[] = [
       await seedCatalogAndInventory(prisma);
     },
   },
+  {
+    name: 'storefront-navigation',
+    seed: async (prisma) => {
+      const { seedNavigation } = await import('./seed-navigation');
+      await seedNavigation(prisma);
+    },
+  },
 ];
 
 async function main() {

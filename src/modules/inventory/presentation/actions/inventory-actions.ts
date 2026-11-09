@@ -19,6 +19,8 @@ export async function adjustInventoryAction(input: AdjustInventoryInput) {
 
   revalidatePath('/admin/inventory');
   revalidatePath('/admin/products');
+  revalidatePath('/', 'layout');
+  revalidatePath('/products');
   return { ok: true, quantity: result.value.quantity };
 }
 
@@ -32,6 +34,8 @@ export async function bulkUpdateInventoryAction(input: BulkUpdateInventoryInput)
 
   revalidatePath('/admin/inventory');
   revalidatePath('/admin/products');
+  revalidatePath('/', 'layout');
+  revalidatePath('/products');
   return { ok: true, updatedCount: result.value.updatedCount };
 }
 

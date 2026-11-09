@@ -12,6 +12,7 @@ import { PrismaUnitOfWork } from '../database/prisma-unit-of-work';
 import { registerIdentityAccess } from '@/modules/identity-access';
 import { registerCatalog } from '@/modules/catalog';
 import { registerInventory } from '@/modules/inventory';
+import { registerContent } from '@/modules/content';
 
 import Redis from 'ioredis';
 import { env } from '../config/env';
@@ -57,6 +58,7 @@ export const registeredModules: ModuleRegistration[] = [
   registerIdentityAccess,
   registerCatalog,
   registerInventory,
+  registerContent,
 ];
 
 export function createAppContainer(moduleRegistrars = registeredModules): Container {
@@ -95,3 +97,6 @@ export function createAppContainer(moduleRegistrars = registeredModules): Contai
 
   return container;
 }
+
+export const appContainer: Container = createAppContainer();
+

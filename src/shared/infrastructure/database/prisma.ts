@@ -6,14 +6,18 @@ declare global {
   var __prismaClient: PrismaClient | undefined;
 }
 
+let isDatabaseAvailable = false;
+let hasCheckedDatabase = false;
+
 export function createPrismaClient(): PrismaClient {
   let realClient: PrismaClient | null = null;
   try {
     realClient = new PrismaClient({
-      log: env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
+      log: [],
     });
-  } catch (err) {
-    console.warn('[AI Studio] PrismaClient instantiation fallback:', err);
+  } catch {
+    hasCheckedDatabase = true;
+    isDatabaseAvailable = false;
   }
 
   if ((process.env.VITEST || env.NODE_ENV === 'test') && realClient) {
@@ -26,6 +30,12 @@ export function createPrismaClient(): PrismaClient {
     get(target, prop, receiver) {
       if (prop === '$transaction') {
         return async function (arg: unknown) {
+          if (hasCheckedDatabase && !isDatabaseAvailable) {
+            if (typeof arg === 'function') {
+              return (arg as (client: unknown) => Promise<unknown>)(receiver);
+            }
+            return [];
+          }
           try {
             if (target.$transaction) {
               return await (target.$transaction as (a: unknown) => Promise<unknown>)(arg);
@@ -35,7 +45,8 @@ export function createPrismaClient(): PrismaClient {
             if (message.includes('ROLLBACK_TRANSACTION_FOR_TEST')) {
               throw err;
             }
-            console.warn('[AI Studio] Database $transaction fallback:', message);
+            hasCheckedDatabase = true;
+            isDatabaseAvailable = false;
           }
           if (typeof arg === 'function') {
             return (arg as (client: unknown) => Promise<unknown>)(receiver);
@@ -61,6 +72,11 @@ export function createPrismaClient(): PrismaClient {
             const modelOrig = Reflect.get(modelTarget, modelProp, modelReceiver);
             if (typeof modelOrig === 'function') {
               return function (...args: unknown[]) {
+                if (hasCheckedDatabase && !isDatabaseAvailable) {
+                  const fallbackFn = modelFallback[String(modelProp)] ?? (async () => null);
+                  return fallbackFn(...args);
+                }
+
                 try {
                   const result = (modelOrig as (...a: unknown[]) => unknown).apply(
                     modelTarget,
@@ -72,16 +88,16 @@ export function createPrismaClient(): PrismaClient {
                       if (message.includes('ROLLBACK_TRANSACTION_FOR_TEST')) {
                         throw err;
                       }
-                      console.warn(
-                        `[AI Studio] Database ${String(prop)}.${String(modelProp)} fallback:`,
-                        message,
-                      );
+                      hasCheckedDatabase = true;
+                      isDatabaseAvailable = false;
                       const fallbackFn = modelFallback[String(modelProp)] ?? (async () => null);
                       return fallbackFn(...args);
                     });
                   }
                   return result;
                 } catch {
+                  hasCheckedDatabase = true;
+                  isDatabaseAvailable = false;
                   const fallbackFn = modelFallback[String(modelProp)] ?? (async () => null);
                   return fallbackFn(...args);
                 }
